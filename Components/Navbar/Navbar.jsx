@@ -4,17 +4,16 @@ import React, { useState } from "react";
 import { useTheme } from "@/context/ThemeProvider";
 import Sidebar from "../Sidebar/Sidebar";
 import { FaBars } from "react-icons/fa";
+import Link from "next/link";
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
   const closeDropdown = () => setIsDropdownOpen(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const toggleSidebar = () => {
-    setSidebarOpen((prev) => !prev);
-  };
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
   return (
     <>
@@ -28,12 +27,28 @@ const Navbar = () => {
             >
               <FaBars />
             </button>
-            <a href="/" className="text-2xl font-bold text-white">
+            <Link href="/" className="text-2xl font-bold text-white">
               Our Platform ✨
-            </a>
+            </Link>
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Main Navigation Links */}
+            <div className="hidden md:flex space-x-6">
+              <Link
+                href="/ngo"
+                className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition"
+              >
+                NGOs
+              </Link>
+              <Link
+                href="/events"
+                className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition"
+              >
+                Events
+              </Link>
+            </div>
+
             {/* Plus Button with Dropdown */}
             <div className="relative">
               <button
@@ -50,40 +65,40 @@ const Navbar = () => {
                   className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50"
                   onMouseLeave={closeDropdown}
                 >
-                  <a
-                    href="#"
+                  <Link
+                    href="/ngo/create"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                  >
+                    Create NGO
+                  </Link>
+                  {/* <Link
+                    href="/events/create"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                   >
                     Create Event
-                  </a>
-                  <a
-                    href="#"
+                  </Link>
+                  <Link
+                    href="/events"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                   >
-                    Join Event
-                  </a>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-                  >
-                    Add Event
-                  </a>
+                    Browse Events
+                  </Link> */}
                 </div>
               )}
             </div>
 
-            <a
+            <Link
               href="/register"
-              className="text-white hover:text-yellow-300 dark:hover:text-blue-300"
+              className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition"
             >
               Register
-            </a>
-            <a
+            </Link>
+            <Link
               href="/login"
-              className="text-white hover:text-yellow-300 dark:hover:text-blue-300"
+              className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition"
             >
               Login
-            </a>
+            </Link>
 
             <div
               onClick={toggleTheme}

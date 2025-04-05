@@ -3,39 +3,14 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import CalendarPage from "../../../Components/CalendarPage/CalendarPage";
+import { useData } from "@/context/DataContext";
+import { useParams } from "next/navigation";
 
 const NgoProfilePage = () => {
   const router = useRouter();
-  const [events, setEvents] = useState([
-    {
-      id: "event001", // Added unique ID
-      title: "Tree Plantation Drive",
-      description: "Planting trees in the community park.",
-      location: "Community Park, City Center",
-      start_time: "2023-11-15T10:00:00", // Changed to ISO string
-      end_time: "2023-11-15T13:00:00", // Changed to ISO string
-      start_photo_url: "https://via.placeholder.com/150",
-      end_photo_url: "https://via.placeholder.com/150",
-      completed: false, // Added completion status
-      organizer_id: "user123", // Added organizer ID
-      participants: ["user456", "user789"],
-      attendance: {},
-    },
-    {
-      id: "event002", // Added unique ID
-      title: "Food Distribution",
-      description: "Distributing food to the underprivileged.",
-      location: "Downtown Shelter",
-      start_time: "2023-11-20T12:00:00", // Changed to ISO string
-      end_time: "2023-11-20T15:00:00", // Changed to ISO string
-      start_photo_url: "https://via.placeholder.com/150",
-      end_photo_url: "https://via.placeholder.com/150",
-      completed: true, // Added completion status
-      organizer_id: "user124", // Added organizer ID
-      participants: ["user123", "user456"],
-      attendance: { user123: 3, user456: 2.5 },
-    },
-  ]);
+  const { events, loading, error } = useData();
+  const { id: ngoId } = useParams();
+  const filteredEvents = events.filter((event) => event.ngo_id == ngoId);
 
   const formatDateTime = (isoString) => {
     try {
@@ -56,6 +31,9 @@ const NgoProfilePage = () => {
     router.push(`/events/${eventId}`);
   };
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e] text-gray-800 dark:text-gray-100 py-10 px-4">
       <div className="w-full mx-auto flex flex-col lg:flex-row gap-8">
@@ -73,7 +51,7 @@ const NgoProfilePage = () => {
             Scheduled Events
           </h2>
           <div className="space-y-6">
-            {events.map((event) => (
+            {filteredEvents.map((event) => (
               <div
                 key={event.id}
                 onClick={() => handleEventClick(event.id)}
@@ -140,9 +118,9 @@ const NgoProfilePage = () => {
                 </div>
                 <div className="flex items-center gap-2 pt-2">
                   <div className="flex -space-x-2">
-                    {event.participants.slice(0, 3).map((participant, idx) => (
+                    {event.participants.slice(0, 3).map((participant) => (
                       <div
-                        key={idx}
+                        key={participant} // Using participant ID as key
                         className="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 bg-gray-300 dark:bg-gray-600 flex items-center justify-center overflow-hidden text-xs"
                         title={participant}
                       >
