@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/context/ThemeProvider";
+import { useData } from "@/context/DataContext";
 import {
   format,
   startOfMonth,
@@ -18,9 +19,12 @@ import {
 
 const UserDashboard = () => {
   const { theme } = useTheme();
+  // Assuming you have a context for user data
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { me, events, loading, error } = useData();
 
   // User data and stats
   const [userStats, setUserStats] = useState({
@@ -63,28 +67,28 @@ const UserDashboard = () => {
   ]);
 
   // Calendar events
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      title: "Tree Plantation Drive",
-      description: "Planting trees in the community park.",
-      location: "Community Park, City Center",
-      date: new Date("2025-04-15"),
-      start_time: "10:00",
-      end_time: "13:00",
-      status: "attended",
-    },
-    {
-      id: 2,
-      title: "Food Distribution",
-      description: "Distributing food to the underprivileged.",
-      location: "Downtown Shelter",
-      date: new Date("2025-04-25"),
-      start_time: "12:00",
-      end_time: "15:00",
-      status: "registered",
-    },
-  ]);
+  // const [events, setEvents] = useState([
+  //   {
+  //     id: 1,
+  //     title: "Tree Plantation Drive",
+  //     description: "Planting trees in the community park.",
+  //     location: "Community Park, City Center",
+  //     date: new Date("2025-04-15"),
+  //     start_time: "10:00",
+  //     end_time: "13:00",
+  //     status: "attended",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Food Distribution",
+  //     description: "Distributing food to the underprivileged.",
+  //     location: "Downtown Shelter",
+  //     date: new Date("2025-04-25"),
+  //     start_time: "12:00",
+  //     end_time: "15:00",
+  //     status: "registered",
+  //   },
+  // ]);
 
   // Calendar rendering functions
   const renderHeader = () => (

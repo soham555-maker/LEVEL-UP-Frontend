@@ -54,7 +54,7 @@ const NgoProfilePage = () => {
             {filteredEvents.map((event) => (
               <div
                 key={event.id}
-                onClick={() => handleEventClick(event.id)}
+                onClick={() => handleEventClick(event._id)}
                 className="p-5 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-md space-y-3 cursor-pointer hover:shadow-lg transition-shadow"
               >
                 <div className="flex justify-between items-start">

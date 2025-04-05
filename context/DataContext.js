@@ -17,6 +17,7 @@ export const DataProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [ngos, setNgos] = useState([]);
   const [events, setEvents] = useState([]);
+  const [me, setMe] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -27,23 +28,28 @@ export const DataProvider = ({ children }) => {
     try {
       const headers = {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("session_token")}`,
+        Accept: "application/json",
       };
 
-      const [usersRes, ngosRes, eventsRes] = await Promise.all([
+      const [usersRes, ngosRes, eventsRes, meRes] = await Promise.all([
         fetch("http://localhost:5000/get/users", { headers }),
         fetch("http://localhost:5000/get/ngos", { headers }),
         fetch("http://localhost:5000/get/events", { headers }),
+        fetch("http://localhost:5000/auth/me", { headers }),
       ]);
 
-      const [usersData, ngosData, eventsData] = await Promise.all([
+      const [usersData, ngosData, eventsData, meData] = await Promise.all([
         usersRes.json(),
         ngosRes.json(),
         eventsRes.json(),
+        meRes.json(),
       ]);
 
       setUsers(usersData);
       setNgos(ngosData);
       setEvents(eventsData);
+      setMe(meData);
     } catch (err) {
       setError(err.message || "Failed to fetch data");
     } finally {
@@ -63,6 +69,7 @@ export const DataProvider = ({ children }) => {
         events,
         loading,
         error,
+        me,
         refreshData: fetchData,
       }}
     >

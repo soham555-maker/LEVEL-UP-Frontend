@@ -3,40 +3,43 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import { useData } from "@/context/DataContext";
 
 const EventsPage = () => {
   const router = useRouter();
 
-  const [events] = useState([
-    {
-      id: "event001",
-      title: "Beach Cleanup Drive",
-      description: "Join us to clean up the city's main beach area",
-      ngo: "Green Earth",
-      location: "Marine Drive Beach",
-      start_time: "2023-12-05T09:00:00",
-      end_time: "2023-12-05T12:00:00",
-      start_photo_url: "https://via.placeholder.com/150",
-      end_photo_url: "https://via.placeholder.com/150",
-      participants: ["user456", "user789"],
-      attendance: {},
-      completed: false, // New field
-    },
-    {
-      id: "event002",
-      title: "Winter Clothes Distribution",
-      description: "Distributing warm clothes to homeless people",
-      ngo: "Helping Hands",
-      location: "City Shelter",
-      start_time: "2023-12-10T14:00:00",
-      end_time: "2023-12-10T17:00:00",
-      start_photo_url: "https://via.placeholder.com/150",
-      end_photo_url: "https://via.placeholder.com/150",
-      participants: ["user123", "user456"],
-      attendance: { user123: 3, user456: 2.5 },
-      completed: true, // New field
-    },
-  ]);
+  const { events, loading, error } = useData();
+
+  // const [events] = useState([
+  //   {
+  //     id: "event001",
+  //     title: "Beach Cleanup Drive",
+  //     description: "Join us to clean up the city's main beach area",
+  //     ngo: "Green Earth",
+  //     location: "Marine Drive Beach",
+  //     start_time: "2023-12-05T09:00:00",
+  //     end_time: "2023-12-05T12:00:00",
+  //     start_photo_url: "https://via.placeholder.com/150",
+  //     end_photo_url: "https://via.placeholder.com/150",
+  //     participants: ["user456", "user789"],
+  //     attendance: {},
+  //     completed: false, // New field
+  //   },
+  //   {
+  //     id: "event002",
+  //     title: "Winter Clothes Distribution",
+  //     description: "Distributing warm clothes to homeless people",
+  //     ngo: "Helping Hands",
+  //     location: "City Shelter",
+  //     start_time: "2023-12-10T14:00:00",
+  //     end_time: "2023-12-10T17:00:00",
+  //     start_photo_url: "https://via.placeholder.com/150",
+  //     end_photo_url: "https://via.placeholder.com/150",
+  //     participants: ["user123", "user456"],
+  //     attendance: { user123: 3, user456: 2.5 },
+  //     completed: true, // New field
+  //   },
+  // ]);
 
   const formatEventDate = (isoString) => {
     try {
@@ -75,7 +78,7 @@ const EventsPage = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => router.push(`/events/${event.id}`)}
+                      onClick={() => router.push(`/events/${event._id}`)}
                       className="px-4 py-2 bg-transparent border border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 rounded-md hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 transition"
                     >
                       View Details

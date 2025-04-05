@@ -1,57 +1,24 @@
-// app/event/[id]/page.jsx
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
+import { useData } from "@/context/DataContext";
 
 const EventDetailsPage = () => {
   const { id } = useParams();
   const router = useRouter();
   const [event, setEvent] = useState(null);
   const [photos, setPhotos] = useState({ start: null, end: null });
-  const [isOrganizer, setIsOrganizer] = useState(false); // Add organizer check
+  const [isOrganizer, setIsOrganizer] = useState(false);
+  const { events, me } = useData();
 
   useEffect(() => {
-    const dummyEvents = [
-      {
-        id: "event001",
-        title: "Beach Cleanup Drive",
-        description: "Join us to clean up the city's main beach area",
-        ngo: "Green Earth",
-        location: "Marine Drive Beach",
-        start_time: "2023-12-05T09:00:00",
-        end_time: "2023-12-05T12:00:00",
-        start_photo_url: null, // Initially null
-        end_photo_url: null, // Initially null
-        participants: ["user456", "user789"],
-        attendance: {},
-        completed: false,
-        organizer_id: "user123", // Add organizer ID
-      },
-      {
-        id: "event002",
-        title: "Winter Clothes Distribution",
-        description: "Distributing warm clothes to homeless people",
-        ngo: "Helping Hands",
-        location: "City Shelter",
-        start_time: "2023-12-10T14:00:00",
-        end_time: "2023-12-10T17:00:00",
-        start_photo_url: "https://via.placeholder.com/150",
-        end_photo_url: "https://via.placeholder.com/150",
-        participants: ["user123", "user456"],
-        attendance: { user123: 3, user456: 2.5 },
-        completed: true,
-        organizer_id: "user124",
-      },
-    ];
-
-    const foundEvent = dummyEvents.find((e) => e.id === id);
+    const foundEvent = events.find((e) => e._id === id);
     if (foundEvent) {
       setEvent(foundEvent);
-      // In a real app, you would check against the logged-in user's ID
-      setIsOrganizer(foundEvent.organizer_id === "user123"); // Example check
+      setIsOrganizer(foundEvent.organizer_id === me?.id);
     }
-  }, [id]);
+  }, [id, events, me]);
 
   const formatDateTime = (isoString) => {
     try {
@@ -66,7 +33,6 @@ const EventDetailsPage = () => {
       alert("Please provide both start and end photos");
       return;
     }
-    // In a real app, you would send this to your backend
     alert("Event completion submitted to backend");
     setEvent((prev) => ({
       ...prev,
@@ -133,7 +99,7 @@ const EventDetailsPage = () => {
                     Event Photos
                   </h2>
                   <div className="grid grid-cols-2 gap-4 mb-6">
-                    {event.start_photo_url ? (
+                    {event.start_photo_url && (
                       <div>
                         <p className="text-sm mb-2">Start Photo</p>
                         <img
@@ -146,8 +112,8 @@ const EventDetailsPage = () => {
                           }}
                         />
                       </div>
-                    ) : null}
-                    {event.end_photo_url ? (
+                    )}
+                    {event.end_photo_url && (
                       <div>
                         <p className="text-sm mb-2">End Photo</p>
                         <img
@@ -160,7 +126,7 @@ const EventDetailsPage = () => {
                           }}
                         />
                       </div>
-                    ) : null}
+                    )}
                   </div>
 
                   <h2 className="text-xl font-semibold mb-4 text-yellow-700 dark:text-purple-300">
@@ -179,7 +145,7 @@ const EventDetailsPage = () => {
                           {Object.entries(event.attendance).map(
                             ([userId, hours]) => (
                               <tr
-                                key={userId}
+                                key={`attendance-${userId}`}
                                 className="border-t border-gray-200 dark:border-gray-600"
                               >
                                 <td className="py-2">
@@ -263,9 +229,9 @@ const EventDetailsPage = () => {
             </h2>
             <div className="flex flex-wrap gap-2">
               {event.participants.length > 0 ? (
-                event.participants.map((participant, idx) => (
+                event.participants.map((participant) => (
                   <div
-                    key={idx}
+                    key={`participant-${participant}`}
                     className="px-3 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-800 dark:text-blue-400 rounded-full text-sm"
                   >
                     User {participant.slice(-3)}
