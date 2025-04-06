@@ -8,16 +8,27 @@ const EventDetailsPage = () => {
   const { id } = useParams();
   const router = useRouter();
   const [event, setEvent] = useState(null);
-  const [photos, setPhotos] = useState({ start: null, end: null });
+  const [photos, setPhotos] = useState({
+    start: null,
+    end: null,
+    startPreview: null,
+    endPreview: null,
+  });
+  const { events, me, users } = useData();
   const [isOrganizer, setIsOrganizer] = useState(false);
-  const { events, me } = useData();
+  const [uploading, setUploading] = useState({ start: false, end: false });
 
   useEffect(() => {
-    const foundEvent = events.find((e) => e._id === id);
-    if (foundEvent) {
-      setEvent(foundEvent);
-      setIsOrganizer(foundEvent.organizer_id === me?.id);
+    const currentEvent = events.find((e) => e._id === id);
+    const currentUser = users.find((u) => u._id === me?.id);
+    if (currentUser?.ngos_owned) {
+      currentUser.ngos_owned.forEach((ngo) => {
+        if (currentEvent?.ngo_id === ngo) {
+          setIsOrganizer(true);
+        }
+      });
     }
+    setEvent(currentEvent);
   }, [id, events, me]);
 
   const formatDateTime = (isoString) => {
@@ -28,18 +39,86 @@ const EventDetailsPage = () => {
     }
   };
 
-  const handleCompleteEvent = () => {
+  const handleImageUpload = (type) => async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.match("image.*")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    // Validate file size (limit to 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image size should be less than 2MB");
+      return;
+    }
+
+    setUploading({ ...uploading, [type]: true });
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const base64String = event.target.result;
+      setPhotos((prev) => ({
+        ...prev,
+        [type]: base64String,
+        [`${type}Preview`]: URL.createObjectURL(file),
+      }));
+      setUploading({ ...uploading, [type]: false });
+    };
+
+    reader.onerror = () => {
+      alert("Error reading file");
+      setUploading({ ...uploading, [type]: false });
+    };
+
+    reader.readAsDataURL(file);
+  };
+  const handleCompleteEvent = async () => {
     if (!photos.start || !photos.end) {
       alert("Please provide both start and end photos");
       return;
     }
-    alert("Event completion submitted to backend");
-    setEvent((prev) => ({
-      ...prev,
-      start_photo_url: photos.start,
-      end_photo_url: photos.end,
-      completed: true,
-    }));
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1/attendance/process_event",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Add authorization header if needed
+            // "Authorization": `Bearer ${yourAuthToken}`
+          },
+          body: JSON.stringify({
+            event_id: id, // using the event id from URL params
+            start_photo: photos.start,
+            end_photo: photos.end,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Update local state only after successful backend response
+      setEvent((prev) => ({
+        ...prev,
+        start_photo_url: photos.start,
+        end_photo_url: photos.end,
+        completed: true,
+      }));
+
+      alert("Event completed successfully!");
+    } catch (error) {
+      console.error("Error completing event:", error);
+      alert("Failed to complete event. Please try again.");
+    }
   };
 
   const handleRegister = () => {
@@ -171,39 +250,73 @@ const EventDetailsPage = () => {
                   </h2>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm mb-2">
-                        Start Photo URL
-                      </label>
-                      <input
-                        type="url"
-                        value={photos.start || ""}
-                        onChange={(e) =>
-                          setPhotos({
-                            ...photos,
-                            start: e.target.value || null,
-                          })
-                        }
-                        className="w-full p-2 rounded border dark:bg-gray-700"
-                        placeholder="Enter image URL"
-                      />
+                      <label className="block text-sm mb-2">Start Photo</label>
+                      <div className="flex flex-col items-center gap-2">
+                        {photos.startPreview ? (
+                          <img
+                            src={photos.startPreview}
+                            className="w-full h-48 object-cover rounded-lg mb-2"
+                            alt="Start preview"
+                          />
+                        ) : (
+                          <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-2">
+                            <span className="text-gray-500">
+                              No image selected
+                            </span>
+                          </div>
+                        )}
+                        <label className="cursor-pointer w-full">
+                          <div className="w-full py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition text-center">
+                            {uploading.start
+                              ? "Uploading..."
+                              : "Upload Start Photo"}
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload("start")}
+                            className="hidden"
+                            disabled={uploading.start}
+                          />
+                        </label>
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm mb-2">
-                        End Photo URL
-                      </label>
-                      <input
-                        type="url"
-                        value={photos.end || ""}
-                        onChange={(e) =>
-                          setPhotos({ ...photos, end: e.target.value || null })
-                        }
-                        className="w-full p-2 rounded border dark:bg-gray-700"
-                        placeholder="Enter image URL"
-                      />
+                      <label className="block text-sm mb-2">End Photo</label>
+                      <div className="flex flex-col items-center gap-2">
+                        {photos.endPreview ? (
+                          <img
+                            src={photos.endPreview}
+                            className="w-full h-48 object-cover rounded-lg mb-2"
+                            alt="End preview"
+                          />
+                        ) : (
+                          <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-2">
+                            <span className="text-gray-500">
+                              No image selected
+                            </span>
+                          </div>
+                        )}
+                        <label className="cursor-pointer w-full">
+                          <div className="w-full py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition text-center">
+                            {uploading.end
+                              ? "Uploading..."
+                              : "Upload End Photo"}
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload("end")}
+                            className="hidden"
+                            disabled={uploading.end}
+                          />
+                        </label>
+                      </div>
                     </div>
                     <button
                       onClick={handleCompleteEvent}
                       className="w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
+                      disabled={uploading.start || uploading.end}
                     >
                       Mark Event as Complete
                     </button>

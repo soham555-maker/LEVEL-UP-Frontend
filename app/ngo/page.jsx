@@ -19,11 +19,11 @@ const NgoPage = () => {
     router.push(`/ngo/${ngoId}`);
   };
 
-  const filteredNgos = ngos.filter(
-    (ngo) =>
-      ngo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ngo.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredNgos = ngos.filter(
+  //   (ngo) =>
+  //     ngo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     ngo.description.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
 
   if (!isClient) {
     return (
@@ -79,7 +79,7 @@ const NgoPage = () => {
             />
           </div>
 
-          {filteredNgos.length === 0 ? (
+          {ngos.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500 dark:text-gray-400">
                 No NGOs found matching your search
@@ -87,7 +87,7 @@ const NgoPage = () => {
             </div>
           ) : (
             <ul className="space-y-6">
-              {filteredNgos.map((ngo) => (
+              {ngos.map((ngo) => (
                 <li
                   key={ngo._id}
                   className="bg-white/80 dark:bg-gray-700/80 rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg"

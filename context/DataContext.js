@@ -29,7 +29,7 @@ export const DataProvider = ({ children }) => {
       const headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("session_token")}`,
-        Accept: "application/json",
+        Accept: "*/*",
       };
 
       const [usersRes, ngosRes, eventsRes, meRes] = await Promise.all([
