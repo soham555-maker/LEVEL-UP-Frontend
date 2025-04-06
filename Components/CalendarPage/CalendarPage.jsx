@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useData } from "@/context/DataContext";
 import {
   format,
   startOfMonth,
@@ -16,48 +17,18 @@ import {
   parseISO,
 } from "date-fns";
 
-const CalendarPage = ({ events: propEvents = [] }) => {
+const CalendarPage = () => {
   const router = useRouter();
+  const { events, ngos, me, loading, error, refreshData } = useData();
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(today);
   const [selectedDate, setSelectedDate] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [events, setEvents] = useState([
-    ...propEvents,
-    {
-      id: "event001",
-      title: "Tree Plantation Drive",
-      description: "Planting trees in the community park.",
-      location: "Community Park, City Center",
-      start_time: "2025-04-15T10:00:00",
-      end_time: "2025-04-15T13:00:00",
-      start_photo_url: "https://via.placeholder.com/150",
-      end_photo_url: "https://via.placeholder.com/150",
-      completed: false,
-      organizer_id: "user123",
-      participants: ["user456", "user789"],
-      attendance: {},
-    },
-    {
-      id: "event002",
-      title: "Food Distribution",
-      description: "Distributing food to the underprivileged.",
-      location: "Downtown Shelter",
-      start_time: "2025-04-25T12:00:00",
-      end_time: "2025-04-25T15:00:00",
-      start_photo_url: "https://via.placeholder.com/150",
-      end_photo_url: "https://via.placeholder.com/150",
-      completed: true,
-      organizer_id: "user124",
-      participants: ["user123", "user456"],
-      attendance: { user123: 3, user456: 2.5 },
-    },
-  ]);
-
   const [formData, setFormData] = useState({
     title: "",
     location: "",
     description: "",
+    ngo_id: ngos.length > 0 ? ngos[0]._id : "",
     start_time: "",
     end_time: "",
   });
@@ -99,6 +70,11 @@ const CalendarPage = ({ events: propEvents = [] }) => {
   };
 
   const renderCells = () => {
+    if (loading)
+      return <div className="text-center py-10">Loading events...</div>;
+    if (error)
+      return <div className="text-center py-10 text-red-500">{error}</div>;
+
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart);
@@ -120,7 +96,7 @@ const CalendarPage = ({ events: propEvents = [] }) => {
 
         days.push(
           <div
-            key={cloneDay}
+            key={cloneDay.toString()}
             className={`min-h-[120px] p-2 rounded-xl shadow-sm transition-all duration-200 cursor-pointer flex flex-col justify-between border
               ${
                 !isCurrentMonth
@@ -137,9 +113,7 @@ const CalendarPage = ({ events: propEvents = [] }) => {
                 setSelectedDate(cloneDay);
                 setIsModalOpen(true);
                 setFormData({
-                  title: "",
-                  location: "",
-                  description: "",
+                  ...formData,
                   start_time: format(cloneDay, "yyyy-MM-dd") + "T10:00",
                   end_time: format(cloneDay, "yyyy-MM-dd") + "T12:00",
                 });
@@ -157,33 +131,37 @@ const CalendarPage = ({ events: propEvents = [] }) => {
 
             {hasEvent && (
               <div className="mt-2 space-y-1 animate-fade-in">
-                {dayEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className={`p-2 rounded-md shadow-sm text-xs ${
-                      event.completed
-                        ? "bg-green-50 text-green-800 dark:bg-green-800/30"
-                        : "bg-blue-50 text-blue-800 dark:bg-blue-800/30"
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/event/${event.id}`);
-                    }}
-                  >
-                    <div className="font-bold truncate">{event.title}</div>
-                    {!event.completed && (
-                      <button
-                        className="mt-2 w-full text-xs font-medium px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/event/${event.id}`);
-                        }}
-                      >
-                        View Details
-                      </button>
-                    )}
-                  </div>
-                ))}
+                {dayEvents.map((event) => {
+                  const ngo = ngos.find((n) => n._id === event.ngo_id);
+                  return (
+                    <div
+                      key={event.id}
+                      className={`p-2 rounded-md shadow-sm text-xs ${
+                        event.completed
+                          ? "bg-green-50 text-green-800 dark:bg-green-800/30"
+                          : "bg-blue-50 text-blue-800 dark:bg-blue-800/30"
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/event/${event.id}`);
+                      }}
+                    >
+                      <div className="font-bold truncate">{event.title}</div>
+                      {ngo && <div className="text-xs">{ngo.name}</div>}
+                      {!event.completed && (
+                        <button
+                          className="mt-2 w-full text-xs font-medium px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/event/${event.id}`);
+                          }}
+                        >
+                          View Details
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -192,7 +170,7 @@ const CalendarPage = ({ events: propEvents = [] }) => {
       }
 
       rows.push(
-        <div className="grid grid-cols-7 gap-3 mb-3" key={day}>
+        <div className="grid grid-cols-7 gap-3 mb-3" key={day.toString()}>
           {days}
         </div>
       );
@@ -202,23 +180,43 @@ const CalendarPage = ({ events: propEvents = [] }) => {
     return <div>{rows}</div>;
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const newEvent = {
-      id: `event${events.length + 1}`,
-      ...formData,
-      start_time: formData.start_time,
-      end_time: formData.end_time,
-      start_photo_url: "https://via.placeholder.com/150",
-      end_photo_url: "https://via.placeholder.com/150",
-      completed: false,
-      organizer_id: "current_user_id", // Replace with actual user ID
-      participants: [],
-      attendance: {},
-    };
+    try {
+      if (!me) {
+        alert("Please login to create an event");
+        return;
+      }
 
-    setEvents([...events, newEvent]);
-    setIsModalOpen(false);
+      const response = await fetch("http://127.0.0.1:5000/data/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("session_token")}`,
+        },
+        body: JSON.stringify({
+          name: formData.title,
+          description: formData.description,
+          date: format(selectedDate, "yyyy-MM-dd"),
+          location: formData.location,
+          start_time: formData.start_time.replace("T", " "),
+          end_time: formData.end_time.replace("T", " "),
+          ngo_id: formData.ngo_id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create event");
+      }
+
+      // Refresh data after successful creation
+      await refreshData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   const renderModal = () => {
@@ -231,6 +229,20 @@ const CalendarPage = ({ events: propEvents = [] }) => {
             Add Event for {format(selectedDate, "dd MMM yyyy")}
           </h3>
           <form className="space-y-3" onSubmit={handleSave}>
+            <select
+              value={formData.ngo_id}
+              onChange={(e) =>
+                setFormData({ ...formData, ngo_id: e.target.value })
+              }
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-800"
+              required
+            >
+              {ngos.map((ngo) => (
+                <option key={ngo._id} value={ngo._id}>
+                  {ngo.name}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               placeholder="Event Title"
