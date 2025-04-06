@@ -121,8 +121,45 @@ const EventDetailsPage = () => {
     }
   };
 
-  const handleRegister = () => {
-    alert("Registration functionality to be implemented");
+  const handleRegister = async () => {
+    try {
+      // Get the session token from wherever it's stored (e.g., cookies, localStorage)
+      const sessionToken = localStorage.getItem("session_token"); // Adjust based on your auth storage
+
+      if (!sessionToken) {
+        alert("You need to be logged in to register for events");
+        router.push("/login"); // Redirect to login if not authenticated
+        return;
+      }
+
+      const response = await fetch("http://127.0.0.1:5000/register/event", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({
+          event_id: id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      // Update local state to reflect the new participant
+      setEvent((prev) => ({
+        ...prev,
+        participants: [...prev.participants, me.id],
+      }));
+
+      alert("Successfully registered for the event!");
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert(error.message || "Failed to register for the event");
+    }
   };
 
   if (!event) return <div className="text-center p-8">Loading...</div>;
