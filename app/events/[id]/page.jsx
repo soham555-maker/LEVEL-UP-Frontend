@@ -17,10 +17,12 @@ const EventDetailsPage = () => {
   const { events, me, users } = useData();
   const [isOrganizer, setIsOrganizer] = useState(false);
   const [uploading, setUploading] = useState({ start: false, end: false });
+  const [attendanceData, setAttendanceData] = useState([]);
 
   useEffect(() => {
     const currentEvent = events.find((e) => e._id === id);
     const currentUser = users.find((u) => u._id === me?.id);
+
     if (currentUser?.ngos_owned) {
       currentUser.ngos_owned.forEach((ngo) => {
         if (currentEvent?.ngo_id === ngo) {
@@ -28,8 +30,26 @@ const EventDetailsPage = () => {
         }
       });
     }
+
     setEvent(currentEvent);
-  }, [id, events, me]);
+
+    // Prepare attendance data when event is completed
+    if (currentEvent?.completed) {
+      const attendanceList = [];
+      users.forEach((user) => {
+        if (user.attendance_summary && user.attendance_summary[id]) {
+          attendanceList.push({
+            userId: user._id,
+            name: user.name,
+            email: user.email,
+            profilePic: user.profile_pic_url,
+            hours: user.attendance_summary[id],
+          });
+        }
+      });
+      setAttendanceData(attendanceList);
+    }
+  }, [id, events, me, users]);
 
   const formatDateTime = (isoString) => {
     try {
@@ -43,13 +63,11 @@ const EventDetailsPage = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.match("image.*")) {
       alert("Please select an image file");
       return;
     }
 
-    // Validate file size (limit to 2MB)
     if (file.size > 2 * 1024 * 1024) {
       alert("Image size should be less than 2MB");
       return;
@@ -76,6 +94,7 @@ const EventDetailsPage = () => {
 
     reader.readAsDataURL(file);
   };
+
   const handleCompleteEvent = async () => {
     if (!photos.start || !photos.end) {
       alert("Please provide both start and end photos");
@@ -89,11 +108,9 @@ const EventDetailsPage = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // Add authorization header if needed
-            // "Authorization": `Bearer ${yourAuthToken}`
           },
           body: JSON.stringify({
-            event_id: id, // using the event id from URL params
+            event_id: id,
             start_photo: photos.start,
             end_photo: photos.end,
           }),
@@ -106,7 +123,6 @@ const EventDetailsPage = () => {
 
       const data = await response.json();
 
-      // Update local state only after successful backend response
       setEvent((prev) => ({
         ...prev,
         start_photo_url: photos.start,
@@ -123,12 +139,11 @@ const EventDetailsPage = () => {
 
   const handleRegister = async () => {
     try {
-      // Get the session token from wherever it's stored (e.g., cookies, localStorage)
-      const sessionToken = localStorage.getItem("session_token"); // Adjust based on your auth storage
+      const sessionToken = localStorage.getItem("sessionToken");
 
       if (!sessionToken) {
         alert("You need to be logged in to register for events");
-        router.push("/login"); // Redirect to login if not authenticated
+        router.push("/login");
         return;
       }
 
@@ -149,7 +164,6 @@ const EventDetailsPage = () => {
         throw new Error(data.message || "Registration failed");
       }
 
-      // Update local state to reflect the new participant
       setEvent((prev) => ({
         ...prev,
         participants: [...prev.participants, me.id],
@@ -246,33 +260,43 @@ const EventDetailsPage = () => {
                   </div>
 
                   <h2 className="text-xl font-semibold mb-4 text-yellow-700 dark:text-purple-300">
-                    Attendance Hours
+                    Attendance Summary
                   </h2>
                   <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
-                    {Object.keys(event.attendance).length > 0 ? (
-                      <table className="w-full">
-                        <thead>
-                          <tr>
-                            <th className="text-left">Volunteer</th>
-                            <th className="text-right">Hours</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {Object.entries(event.attendance).map(
-                            ([userId, hours]) => (
-                              <tr
-                                key={`attendance-${userId}`}
-                                className="border-t border-gray-200 dark:border-gray-600"
-                              >
-                                <td className="py-2">
-                                  User {userId.slice(-3)}
-                                </td>
-                                <td className="py-2 text-right">{hours} hrs</td>
-                              </tr>
-                            )
-                          )}
-                        </tbody>
-                      </table>
+                    {attendanceData.length > 0 ? (
+                      <div className="space-y-4">
+                        {attendanceData.map((user) => (
+                          <div
+                            key={`attendance-${user.userId}`}
+                            className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-600/50 rounded-lg"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <img
+                                src={
+                                  user.profilePic ||
+                                  "https://via.placeholder.com/40"
+                                }
+                                alt={user.name}
+                                className="w-10 h-10 rounded-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src =
+                                    "https://via.placeholder.com/40";
+                                }}
+                              />
+                              <div>
+                                <p className="font-medium">{user.name}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                  {user.email}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="bg-yellow-100 dark:bg-yellow-900/30 px-3 py-1 rounded-full text-yellow-800 dark:text-yellow-200">
+                              {user.hours} hrs
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
                       <p className="text-center text-gray-500">
                         No attendance records yet
@@ -379,14 +403,32 @@ const EventDetailsPage = () => {
             </h2>
             <div className="flex flex-wrap gap-2">
               {event.participants.length > 0 ? (
-                event.participants.map((participant) => (
-                  <div
-                    key={`participant-${participant}`}
-                    className="px-3 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-800 dark:text-blue-400 rounded-full text-sm"
-                  >
-                    User {participant.slice(-3)}
-                  </div>
-                ))
+                event.participants.map((participantId) => {
+                  const participant = users.find(
+                    (u) => u._id === participantId
+                  );
+                  return (
+                    <div
+                      key={`participant-${participantId}`}
+                      className="flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-800 dark:text-blue-400 rounded-full text-sm space-x-2"
+                    >
+                      {participant?.profile_pic_url ? (
+                        <img
+                          src={participant.profile_pic_url}
+                          alt={participant?.name}
+                          className="w-5 h-5 rounded-full"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://via.placeholder.com/20";
+                          }}
+                        />
+                      ) : null}
+                      <span>
+                        {participant?.name || `User ${participantId.slice(-3)}`}
+                      </span>
+                    </div>
+                  );
+                })
               ) : (
                 <p className="text-gray-500">No participants yet</p>
               )}
