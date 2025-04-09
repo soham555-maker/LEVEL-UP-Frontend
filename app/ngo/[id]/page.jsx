@@ -42,15 +42,19 @@ const NgoProfilePage = () => {
           <h1 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-500">
             NGO Events Calendar
           </h1>
-          <CalendarPage events={events} />
+          {/* // In NgoProfilePage.jsx */}
+          <CalendarPage
+            ngoId={ngoId} // This locks the calendar to this NGO
+            events={filteredEvents} // Optional: pre-filtered events
+          />
         </div>
 
         {/* Events List Section */}
-        <div className="w-full lg:w-[30%] bg-white/90 dark:bg-gray-800/90 shadow-xl backdrop-blur-md rounded-xl p-6">
+        <div className="w-full   lg:w-[30%] bg-white/90 dark:bg-gray-800/90 shadow-xl backdrop-blur-md rounded-xl p-6">
           <h2 className="text-2xl font-semibold mb-6 text-yellow-700 dark:text-purple-300">
             Scheduled Events
           </h2>
-          <div className="space-y-6">
+          <div className="space-y-6 max-h-[800px] overflow-y-auto">
             {filteredEvents.map((event) => (
               <div
                 key={event.id}
@@ -83,37 +87,46 @@ const NgoProfilePage = () => {
                   </span>
                 </p>
                 <div className="flex gap-3 pt-2">
-                  {event.start_photo_url && (
+                  {event.completed ? (
                     <div>
-                      <p className="text-xs mb-1 text-gray-500 dark:text-gray-400">
-                        Start
-                      </p>
-                      <img
-                        src={event.start_photo_url}
-                        alt="Start"
-                        className="w-20 h-20 rounded-md object-cover"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "https://via.placeholder.com/150";
-                        }}
-                      />
+                      {event.start_photo_url && (
+                        <div>
+                          <p className="text-xs mb-1 text-gray-500 dark:text-gray-400">
+                            Start
+                          </p>
+
+                          <img
+                            src={event.start_photo_url}
+                            alt="Start"
+                            className="w-20 h-20 rounded-md object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "";
+                            }}
+                          />
+                        </div>
+                      )}
+                      {event.end_photo_url && (
+                        <div>
+                          <p className="text-xs mb-1 text-gray-500 dark:text-gray-400">
+                            End
+                          </p>
+                          <img
+                            src={event.end_photo_url}
+                            alt="End"
+                            className="w-20 h-20 rounded-md object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://via.placeholder.com/150";
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {event.end_photo_url && (
-                    <div>
-                      <p className="text-xs mb-1 text-gray-500 dark:text-gray-400">
-                        End
-                      </p>
-                      <img
-                        src={event.end_photo_url}
-                        alt="End"
-                        className="w-20 h-20 rounded-md object-cover"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "https://via.placeholder.com/150";
-                        }}
-                      />
-                    </div>
+                  ) : (
+                    <span className="text-xs text-blue-500 dark:text-blue-400">
+                      Upcoming
+                    </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 pt-2">
