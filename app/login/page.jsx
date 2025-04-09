@@ -12,7 +12,7 @@ const Page = () => {
     e.preventDefault();
     try {
       console.log("Registering user:", { email, password });
-      const response = await fetch("http://localhost:5000/auth/login/email", {
+      const response = await fetch("http://127.0.0.1:5000/auth/login/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -34,13 +34,14 @@ const Page = () => {
   };
 
   const handleSocialLogin = (provider) => {
-    window.location.href = `http://localhost:5000/auth/login/${provider}`;
+    window.location.href = `http://127.0.0.1:5000/auth/login/${provider}`;
   };
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center relative transition-all duration-300 ${isFocused ? "backdrop-blur-sm" : ""
-        } bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e] p-4`}
+      className={`min-h-screen flex items-center justify-center relative transition-all duration-300 ${
+        isFocused ? "backdrop-blur-sm" : ""
+      } bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e] p-4`}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}

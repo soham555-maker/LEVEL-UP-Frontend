@@ -33,10 +33,10 @@ export const DataProvider = ({ children }) => {
       };
 
       const [usersRes, ngosRes, eventsRes, meRes] = await Promise.all([
-        fetch("http://localhost:5000/get/users", { headers }),
-        fetch("http://localhost:5000/get/ngos", { headers }),
-        fetch("http://localhost:5000/get/events", { headers }),
-        fetch("http://localhost:5000/auth/me", { headers }),
+        fetch("http://127.0.0.1:5000/get/users", { headers }),
+        fetch("http://127.0.0.1:5000/get/ngos", { headers }),
+        fetch("http://127.0.0.1:5000/get/events", { headers }),
+        fetch("http://127.0.0.1:5000/auth/me", { headers }),
       ]);
 
       const [usersData, ngosData, eventsData, meData] = await Promise.all([
@@ -49,6 +49,7 @@ export const DataProvider = ({ children }) => {
       setUsers(usersData);
       setNgos(ngosData);
       setEvents(eventsData);
+      console.log(meData);
       setMe(meData);
     } catch (err) {
       setError(err.message || "Failed to fetch data");
@@ -70,7 +71,7 @@ export const DataProvider = ({ children }) => {
         loading,
         error,
         me,
-        refreshData: fetchData,
+        fetchData,
       }}
     >
       {children}

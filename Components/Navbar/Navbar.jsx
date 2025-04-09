@@ -27,8 +27,8 @@ const Navbar = () => {
             >
               <FaBars />
             </button>
-            <Link href="/" className="text-2xl font-bold text-white">
-              Our Platform ✨
+            <Link href="/" className="text-2xl font-bold text-white font-serif">
+              मिलकर
             </Link>
           </div>
 
@@ -37,13 +37,13 @@ const Navbar = () => {
             <div className="hidden md:flex space-x-6">
               <Link
                 href="/ngo"
-                className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition"
+                className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition font-sans"
               >
                 NGOs
               </Link>
               <Link
                 href="/events"
-                className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition"
+                className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition font-sans"
               >
                 Events
               </Link>
@@ -62,7 +62,7 @@ const Navbar = () => {
               {/* Dropdown Menu */}
               {isDropdownOpen && (
                 <div
-                  className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50"
+                  className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 font-sans"
                   onMouseLeave={closeDropdown}
                 >
                   <Link
@@ -71,31 +71,20 @@ const Navbar = () => {
                   >
                     Create NGO
                   </Link>
-                  {/* <Link
-                    href="/events/create"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-                  >
-                    Create Event
-                  </Link>
-                  <Link
-                    href="/events"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-                  >
-                    Browse Events
-                  </Link> */}
+                  {/* Other dropdown items can be added here */}
                 </div>
               )}
             </div>
 
             <Link
               href="/register"
-              className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition"
+              className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition font-sans"
             >
               Register
             </Link>
             <Link
               href="/login"
-              className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition"
+              className="text-white hover:text-yellow-300 dark:hover:text-blue-300 transition font-sans"
             >
               Login
             </Link>

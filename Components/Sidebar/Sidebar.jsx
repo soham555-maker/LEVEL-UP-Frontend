@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp, FaMapMarkedAlt } from "react-icons/fa";
+import { MdShowChart } from "react-icons/md";
+import { AiOutlineShareAlt } from "react-icons/ai";
 import { useTheme } from "@/context/ThemeProvider";
 import Link from "next/link";
 
@@ -33,7 +35,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     >
       <div className="flex justify-between items-center mb-6">
         <h2
-          className={`text-2xl font-bold ${
+          className={`text-2xl font-bold font-serif ${
             theme === "dark"
               ? "bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-aliceblue-100"
               : "bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent"
@@ -59,7 +61,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         } mb-6`}
       ></div>
 
-      <ul className="space-y-4">
+      <ul className="space-y-4 font-sans">
         <li
           className={`${
             theme === "dark" ? "hover:text-purple-300" : "hover:text-yellow-600"
@@ -67,7 +69,9 @@ const Sidebar = ({ isOpen, onClose }) => {
             theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
           }`}
         >
-          Home
+          <Link href="/" className="block w-full">
+            Home
+          </Link>
         </li>
         <li
           className={`${
@@ -76,7 +80,9 @@ const Sidebar = ({ isOpen, onClose }) => {
             theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
           }`}
         >
-          About
+          <Link href="/about" className="block w-full">
+            About
+          </Link>
         </li>
         <li
           className={`${
@@ -85,27 +91,36 @@ const Sidebar = ({ isOpen, onClose }) => {
             theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
           }`}
         >
-          Contact
+          <Link href="/maps" className="flex items-center w-full">
+            <FaMapMarkedAlt className="mr-2" />
+            <span>Maps</span>
+          </Link>
+        </li>
+        <li
+          className={`${
+            theme === "dark" ? "hover:text-purple-300" : "hover:text-yellow-600"
+          } cursor-pointer transition-colors py-2 px-3 rounded-md ${
+            theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
+          }`}
+        >
+          <Link href="/smm" className="flex items-center w-full">
+            <AiOutlineShareAlt className="mr-2" />
+            <span>SMM</span>
+          </Link>
+        </li>
+        <li
+          className={`${
+            theme === "dark" ? "hover:text-purple-300" : "hover:text-yellow-600"
+          } cursor-pointer transition-colors py-2 px-3 rounded-md ${
+            theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
+          }`}
+        >
+          <Link href="/graph" className="flex items-center w-full">
+            <MdShowChart className="mr-2" />
+            <span>Graph</span>
+          </Link>
         </li>
         <li className="mt-2">
-          <div
-            onClick={() => setNgoDropdownOpen((prev) => !prev)}
-            className={`flex items-center justify-between cursor-pointer py-2 px-3 rounded-md ${
-              theme === "dark"
-                ? "hover:text-purple-300 hover:bg-gray-700/50"
-                : "hover:text-yellow-600 hover:bg-gray-100/80"
-            } transition-colors`}
-          >
-            <Link href="/ngo" className="flex items-center">
-              <span>Your NGOs</span>
-            </Link>
-            {ngoDropdownOpen ? (
-              <FaChevronUp size={14} className="ml-2" />
-            ) : (
-              <FaChevronDown size={14} className="ml-2" />
-            )}
-          </div>
-
           {ngoDropdownOpen && (
             <ul
               className={`pl-6 mt-1 space-y-2 text-sm ${
@@ -119,7 +134,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                     : "hover:text-yellow-600 hover:bg-gray-100/60"
                 } transition-colors cursor-pointer`}
               >
-                Helping Hands
+                <Link href="/ngo/helping-hands" className="block w-full">
+                  Helping Hands
+                </Link>
               </li>
               <li
                 className={`py-1 px-2 rounded-md ${
@@ -128,7 +145,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                     : "hover:text-yellow-600 hover:bg-gray-100/60"
                 } transition-colors cursor-pointer`}
               >
-                Green Earth
+                <Link href="/ngo/green-earth" className="block w-full">
+                  Green Earth
+                </Link>
               </li>
               <li
                 className={`py-1 px-2 rounded-md ${
@@ -137,7 +156,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                     : "hover:text-yellow-600 hover:bg-gray-100/60"
                 } transition-colors cursor-pointer`}
               >
-                Health for All
+                <Link href="/ngo/health-for-all" className="block w-full">
+                  Health for All
+                </Link>
               </li>
             </ul>
           )}
@@ -156,21 +177,61 @@ const Sidebar = ({ isOpen, onClose }) => {
             theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
           } font-medium`}
         >
-          Create New NGO
+          <Link href="/ngo/create" className="block w-full">
+            Create New NGO
+          </Link>
         </li>
-        <Link href="/ngo" className="flex items-center">
-          <li
-            className={`${
-              theme === "dark"
-                ? "text-purple-400 hover:text-purple-300"
-                : "text-purple-600 hover:text-purple-700"
-            } cursor-pointer transition-colors py-2 px-3 rounded-md ${
-              theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
-            } font-medium`}
-          >
+        <li
+          className={`${
+            theme === "dark"
+              ? "text-purple-400 hover:text-purple-300"
+              : "text-purple-600 hover:text-purple-700"
+          } cursor-pointer transition-colors py-2 px-3 rounded-md ${
+            theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
+          } font-medium`}
+        >
+          <Link href="/ngo" className="block w-full">
             Find NGOs
-          </li>
-        </Link>
+          </Link>
+        </li>
+
+        <li
+          className={`${
+            theme === "dark"
+              ? "text-pink-400 hover:text-pink-300"
+              : "text-pink-600 hover:text-pink-700"
+          } cursor-pointer transition-colors py-2 px-3 rounded-md ${
+            theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
+          } font-medium`}
+        >
+          <Link href="/chat" className="block w-full">
+            Forum
+          </Link>
+        </li>
+
+        <li
+          className={`${
+            theme === "dark"
+              ? "text-green-400 hover:text-green-300"
+              : "text-green-600 hover:text-green-700"
+          } cursor-pointer transition-colors py-2 px-3 rounded-md ${
+            theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
+          } font-medium`}
+        >
+          <Link href="/dashboard" className="block w-full">
+            Profile
+          </Link>
+        </li>
+
+        <li
+          className={`${
+            theme === "dark"
+              ? "text-blue-400 hover:text-blue-300"
+              : "text-yellow-600 hover:text-yellow-700"
+          } cursor-pointer transition-colors py-2 px-3 rounded-md ${
+            theme === "dark" ? "hover:bg-gray-700/50" : "hover:bg-gray-100/80"
+          } font-medium`}
+        ></li>
       </ul>
 
       <div className="absolute bottom-6 left-6 right-6">

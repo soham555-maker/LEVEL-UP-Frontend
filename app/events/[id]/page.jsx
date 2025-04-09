@@ -103,7 +103,7 @@ const EventDetailsPage = () => {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1/attendance/process_event",
+        "http://127.0.0.1:5000/attendance/process_event",
         {
           method: "POST",
           headers: {
@@ -139,7 +139,7 @@ const EventDetailsPage = () => {
 
   const handleRegister = async () => {
     try {
-      const sessionToken = localStorage.getItem("sessionToken");
+      const sessionToken = localStorage.getItem("session_token");
 
       if (!sessionToken) {
         alert("You need to be logged in to register for events");
