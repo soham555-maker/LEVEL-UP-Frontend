@@ -19,14 +19,7 @@ import {
 
 const CalendarPage = ({ ngoId, events: propEvents }) => {
   const router = useRouter();
-  const {
-    events: allEvents,
-    ngos,
-    me,
-    loading,
-    error,
-    refreshData,
-  } = useData();
+  const { events: allEvents, ngos, me, loading, error, fetchData } = useData();
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(today);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -251,6 +244,45 @@ const CalendarPage = ({ ngoId, events: propEvents }) => {
     }
 
     return <div>{rows}</div>;
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      if (!me) {
+        alert("Please login to create an event");
+        return;
+      }
+
+      const response = await fetch("http://127.0.0.1:5000/data/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("session_token")}`,
+        },
+        body: JSON.stringify({
+          name: formData.title,
+          description: formData.description,
+          date: format(selectedDate, "yyyy-MM-dd"),
+          location: formData.location,
+          start_time: formData.start_time.replace("T", " "),
+          end_time: formData.end_time.replace("T", " "),
+          ngo_id: formData.ngo_id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create event");
+      }
+
+      // Refresh data after successful creation
+      await fetchData();
+      setIsModalOpen(false);
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   const renderModal = () => {

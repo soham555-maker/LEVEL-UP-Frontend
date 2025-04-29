@@ -8,7 +8,7 @@ const DataContext = createContext({
   events: [],
   loading: false,
   error: null,
-  refreshData: async () => {},
+  fetchData: async () => {},
 });
 
 export const useData = () => useContext(DataContext);
@@ -20,6 +20,9 @@ export const DataProvider = ({ children }) => {
   const [me, setMe] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // const fetchData = async () => {
+  //   await fetchData();
+  // };
 
   const fetchData = async () => {
     setLoading(true);
@@ -49,7 +52,7 @@ export const DataProvider = ({ children }) => {
       setUsers(usersData);
       setNgos(ngosData);
       setEvents(eventsData);
-      console.log(meData);
+      // console.log(meData);
       setMe(meData);
     } catch (err) {
       setError(err.message || "Failed to fetch data");
